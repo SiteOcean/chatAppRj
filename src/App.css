@@ -1,0 +1,21 @@
+/* Custom scrollbar styles for a specific div */
+.chatDiv {
+    overflow-y: scroll; /* Enable vertical scrollbar */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #d12d2d #f1f1f1; /* Firefox */
+  
+    /* Webkit/Blink browsers like Chrome and Safari */
+    &::-webkit-scrollbar {
+      width: 2px; /* Width of the entire scrollbar */
+    }
+  
+    &::-webkit-scrollbar-track {
+      background: #f3f0f2; /* Color of the tracking area */
+    }
+  
+    &::-webkit-scrollbar-thumb {
+      background-color: #fc24c6; /* Color of the scrollbar handle */
+      border-radius: 50%;
+    }
+  }
+  
