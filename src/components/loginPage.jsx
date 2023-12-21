@@ -10,7 +10,8 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const apiUrl = process.env.NODE_URL;
+      const response = await axios.post(apiUrl+'/api/login', {
         username,
         password,
       });

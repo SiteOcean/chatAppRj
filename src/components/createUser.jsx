@@ -10,8 +10,9 @@ const CreateUser = () => {
   const navigate = useNavigate()
   const handleCreateUser = async () => {
     if(username.length < 3 || password.length < 3) return;
+    const apiUrl = process.env.NODE_URL;
     try {
-      const response = await axios.post('http://localhost:5000/api/users', {
+      const response = await axios.post(apiUrl+'/api/users', {
         username,
         password,
       });

@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import { GetStoreContext } from './useContextFile';
-
-const socket = io('http://localhost:5000');
+const apiUrl = process.env.NODE_URL;
+const socket = io(apiUrl);
 
 const ChatRoom = () => {
   // const [messages, setMessages] = useState([]);
@@ -34,7 +34,8 @@ const ChatRoom = () => {
 
   const fetchChatHistory = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/chat/${id}/${userId}`);
+     
+      const response = await axios.get(apiUrl+`/api/chat/${id}/${userId}`);
      
       setFullMessages(response.data.messages);
       setloading(true)
