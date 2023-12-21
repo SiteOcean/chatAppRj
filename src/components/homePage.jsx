@@ -3,8 +3,8 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
-const apiUrl = process.env.NODE_URL;
-const socket = io(apiUrl);
+
+const socket = io('https://chatnode-ma15.onrender.com');
 
 const HomePage = () => {
   const [userdata, setUserdata] = useState(null);
@@ -14,8 +14,8 @@ const HomePage = () => {
 
   const userdatafetch = async () => {
     try {
-     
-      const response = await axios.get(apiUrl+'/api/usersdata');
+      const apiUrl = process.env.NODE_URL;
+      const response = await axios.get('https://chatnode-ma15.onrender.com/api/usersdata');
       setUserdata(response.data.users);
     } catch (error) {
       console.error('Failed to fetch user data:', error.message);

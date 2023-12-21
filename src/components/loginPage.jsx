@@ -11,7 +11,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     try {
       const apiUrl = process.env.NODE_URL;
-      const response = await axios.post(apiUrl+'/api/login', {
+      const response = await axios.post('https://chatnode-ma15.onrender.com/api/login', {
         username,
         password,
       });

@@ -12,7 +12,7 @@ const CreateUser = () => {
     if(username.length < 3 || password.length < 3) return;
     const apiUrl = process.env.NODE_URL;
     try {
-      const response = await axios.post(apiUrl+'/api/users', {
+      const response = await axios.post('https://chatnode-ma15.onrender.com/api/users', {
         username,
         password,
       });
