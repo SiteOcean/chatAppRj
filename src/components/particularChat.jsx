@@ -4,7 +4,12 @@ import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import { GetStoreContext } from './useContextFile';
 
-const socket = io('https://chatnode-ma15.onrender.com');
+const socket = io('https://chatnode-ma15.onrender.com', {
+  transports: ['websocket'],
+  withCredentials: true, // Include credentials (cookies) in the request
+});
+
+
 
 const ChatRoom = () => {
   // const [messages, setMessages] = useState([]);
