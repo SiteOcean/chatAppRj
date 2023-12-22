@@ -12,8 +12,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     try {
       const apiUrl = process.env.REACT_APP_NODE_URL;
-      console.log(apiUrl)
-      const response = await axios.post(`${apiUrl}/api/login`, {
+     
+      const response = await axios.post(`${current_path}/api/login`, {
         username,
         password,
       });

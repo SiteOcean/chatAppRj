@@ -15,7 +15,7 @@ const CreateUser = () => {
     const apiUrl = process.env.REACT_APP_NODE_URL;
     
       try {
-      const response = await axios.post(`${apiUrl}/api/users`, {
+      const response = await axios.post(`${current_path}/api/users`, {
         username,
         password,
       });

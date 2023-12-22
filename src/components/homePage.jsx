@@ -22,8 +22,8 @@ const HomePage = () => {
   const userdatafetch = async () => {
     try {
      
-      const response = await axios.get(`${apiUrl}/api/usersdata`);
-      // const response = await axios.get(`${current_path}/api/usersdata`);
+      // const response = await axios.get(`${apiUrl}/api/usersdata`);
+      const response = await axios.get(`${current_path}/api/usersdata`);
       setUserdata(response.data.users);
     } catch (error) {
       console.error('Failed to fetch user data:', error.message);
