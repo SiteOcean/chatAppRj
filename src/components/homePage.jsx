@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { current_path } from '../services/serviceConfigs';
 import { FaBars } from "react-icons/fa";
-const apiUrl = process.env.NODE_URL;
+const apiUrl = process.env.REACT_APP_NODE_URL;
 const socket = io(apiUrl, {
   transports: ['websocket'],
   withCredentials: true, // Include credentials (cookies) in the request
@@ -21,7 +21,7 @@ const HomePage = () => {
 
   const userdatafetch = async () => {
     try {
-      const apiUrl = process.env.NODE_URL;
+     
       const response = await axios.get(`${apiUrl}/api/usersdata`);
       // const response = await axios.get(`${current_path}/api/usersdata`);
       setUserdata(response.data.users);

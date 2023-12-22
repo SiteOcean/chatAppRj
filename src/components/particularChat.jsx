@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import { GetStoreContext } from './useContextFile';
 import { current_path } from '../services/serviceConfigs';
-const apiUrl = process.env.NODE_URL;
+const apiUrl = process.env.REACT_APP_NODE_URL;
 const socket = io(apiUrl, {
   transports: ['websocket'],
   withCredentials: true, // Include credentials (cookies) in the request
