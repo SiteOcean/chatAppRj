@@ -1,7 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-
+import { current_path } from "../services/serviceConfigs";
+const apiUrl = process.env.NODE_URL;
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -10,20 +11,19 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const apiUrl = process.env.NODE_URL;
-      const response = await axios.post('https://chatnode-ma15.onrender.com/api/login', {
+      
+      const response = await axios.post(`${apiUrl}/api/login`, {
         username,
         password,
       });
 
-      if (response.status === 200) {
-        console.log(response.data.userId);
-        
-// Storing the object
-const userData = { userId: response.data.userId, username: response.data.username };
-localStorage.setItem('userData', JSON.stringify(userData));
+    if (response.status === 200) {
+       
+    // Storing the object
+    const userData = { userId: response.data.userId, username: response.data.username };
+    localStorage.setItem('userData', JSON.stringify(userData));
 
-// Retrieving the object
+    // Retrieving the object
         navigate('/home'); 
       }
     } catch (error) {

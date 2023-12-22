@@ -3,8 +3,10 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
-
-const socket = io('https://chatnode-ma15.onrender.com', {
+import { current_path } from '../services/serviceConfigs';
+import { FaBars } from "react-icons/fa";
+const apiUrl = process.env.NODE_URL;
+const socket = io(apiUrl, {
   transports: ['websocket'],
   withCredentials: true, // Include credentials (cookies) in the request
 });
@@ -20,7 +22,8 @@ const HomePage = () => {
   const userdatafetch = async () => {
     try {
       const apiUrl = process.env.NODE_URL;
-      const response = await axios.get('https://chatnode-ma15.onrender.com/api/usersdata');
+      const response = await axios.get(`${apiUrl}/api/usersdata`);
+      // const response = await axios.get(`${current_path}/api/usersdata`);
       setUserdata(response.data.users);
     } catch (error) {
       console.error('Failed to fetch user data:', error.message);
@@ -67,7 +70,12 @@ const HomePage = () => {
     {loginuser && (
       <div className="w-full capitalize">
        
-        <h2 className="font-bold text-2xl bg-[#fc24c6] text-white p-3 pl-4">{loginuser.username} Chat App</h2>
+        <div className='flex items-center gap-5 pl-5 bg-[#fc24c6] p-3'>
+          <span >
+            <FaBars className='text-[25px] font-bold  text-[#ffffff]  text-center'/>
+          </span>
+        <h2 className="font-bold text-2xl  text-white">{loginuser.username} Chat App</h2>
+        </div>
         
         
         <div className='p-3'>

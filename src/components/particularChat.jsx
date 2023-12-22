@@ -3,8 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import { GetStoreContext } from './useContextFile';
-
-const socket = io('https://chatnode-ma15.onrender.com', {
+import { current_path } from '../services/serviceConfigs';
+const apiUrl = process.env.NODE_URL;
+const socket = io(apiUrl, {
   transports: ['websocket'],
   withCredentials: true, // Include credentials (cookies) in the request
 });
@@ -12,15 +13,17 @@ const socket = io('https://chatnode-ma15.onrender.com', {
 
 
 const ChatRoom = () => {
-  // const [messages, setMessages] = useState([]);
+  
   const [messageInput, setMessageInput] = useState('');
   const { userId, name } = useParams();
   const [loginuser, setloginuser] = useState(null)
+
   const {messages , pushMessage, setFullMessages} = GetStoreContext()
   const messagesContainerRef = useRef(null);
   const [loading, setloading] = useState(false)
 
   const sendMessage = () => {
+    console.log(new Date().toISOString(),)
     const storedData = localStorage.getItem('userData');
     const retrievedData = JSON.parse(storedData);
     if (messageInput.trim() !== '' && messageInput.length < 500) {
@@ -28,7 +31,8 @@ const ChatRoom = () => {
         from: retrievedData.userId,
         to: userId,
         message: messageInput,
-        username:retrievedData.username
+        username:retrievedData.username,
+        timestamp: new Date().toISOString(),
       };
       socket.emit('private-message', data);
      
@@ -39,7 +43,7 @@ const ChatRoom = () => {
 
   const fetchChatHistory = async (id) => {
     try {
-      const response = await axios.get(`https://chatnode-ma15.onrender.com/api/chat/${id}/${userId}`);
+      const response = await axios.get(`${apiUrl}/api/chat/${id}/${userId}`);
      
       setFullMessages(response.data.messages);
       setloading(true)
@@ -81,34 +85,45 @@ const ChatRoom = () => {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const formatDate = (timestamp) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(timestamp).toLocaleDateString(undefined, options);
+  };
+  
+  const formatTime = (timestamp) => {
+    const options = { hour: '2-digit', minute: '2-digit' };
+    return new Date(timestamp).toLocaleTimeString(undefined, options);
+  };
+
+
   return (
-    <div className="max-w-[90%] capitalize  sm:max-w-[80%] mt-[30px] sm:mt-[80px] mx-auto p-4 bg-white rounded-md shadow-md">
+   <div className='w-full'>
+     <div className="w-[95%] capitalize sm:max-w-[80%] mt-[23px] sm:mt-[80px] mx-auto p-1 sm:p-4 bg-white rounded-md shadow-lg">
    {loading ? <>
     <h2 className="text-xl mb-4 capitalize text-gray-500 font-semibold">
       {loginuser && loginuser.username && loginuser.username} Chat to {name}
     </h2>
     <div
       ref={messagesContainerRef}
-      className="overflow-y-scroll flex flex-col chatDiv h-[75vh] sm:h-[360px] border border-gray-300 mb-4 p-4 rounded-md"
+      className="overflow-y-scroll flex flex-col chatDiv h-[70vh] sm:h-[360px] border border-gray-200 mb-2 p-3 rounded-md gap-y-2"
     >
       {messages && messages.length > 0 ? messages.map((message, index) => (
-        <div
-          key={index}
-          className={`${
-            loginuser &&
-            loginuser.username &&
-            loginuser.username === message.username
-              ? 'text-[#383737] bg-slate-100'
-              : 'bg-[#f3e2ea] self-end text-[#f33bb6] border'
-          } p-6 mb-2 rounded-md w-[60%] sm:w-[55%]`}
-        >
-          <strong className='font-normal'>
+        <div key={index} className={`${loginuser && loginuser.username && loginuser.username === message.username ? 'text-[#383737] bg-slate-100' : 'bg-[#fcf6f9] self-end text-[#f33bb6]'
+          } px-4 py-4 sm:p-6 mb-2 rounded-md w-[60%] sm:w-[55%] shadow-md relative`}>
+
+          <strong className='text-[9px] sm:text-[10px] absolute opacity-55 top-1 left-1 font-mono font-normal'>
             {loginuser && message && message.username === loginuser.username
               ? 'You'
               : message.username}{' '}
-            :
+            
           </strong>{' '}
           {message.message}
+          <div className='absolute bottom-1 right-2 opacity-55 flex gap-x-2 text-[10px]'>
+          <p>{formatTime(message.timestamp)}</p>
+          <p>{formatDate(message.timestamp)}</p>
+          
+          </div>
         </div>
       )) : <div>No Chats Available...</div>}
     </div>
@@ -122,13 +137,14 @@ const ChatRoom = () => {
       />
       <button
         onClick={sendMessage}
-        className="p-2 bg-blue-500 w-[120px] text-white rounded-r-md hover:bg-blue-600 focus:outline-none"
+        className="p-2 bg-[#fc24c6] w-[120px] text-white rounded-r-md hover:bg-pink-600 focus:outline-none"
       >
         Send
       </button>
     </div>
     </> : <div>Loading...</div>}
   </div>
+   </div>
   
   );
 };

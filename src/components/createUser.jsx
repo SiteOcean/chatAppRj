@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import { current_path } from '../services/serviceConfigs';
+const apiUrl = process.env.NODE_URL;
 const CreateUser = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -10,12 +11,20 @@ const CreateUser = () => {
   const navigate = useNavigate()
   const handleCreateUser = async () => {
     if(username.length < 3 || password.length < 3) return;
-    const apiUrl = process.env.NODE_URL;
-    try {
-      const response = await axios.post('https://chatnode-ma15.onrender.com/api/users', {
+   
+   
+      try {
+      const response = await axios.post(`${apiUrl}/api/users`, {
         username,
         password,
       });
+     
+      if(response.status === 200 && response.data.message === "User account created successfully"){
+      
+        alert('User account created successfully')
+        navigate('/', { replace: true })
+        setMessage(response.data.message);
+      }
 
       setMessage(response.data.message);
       // You can redirect or perform other actions after successful user creation
