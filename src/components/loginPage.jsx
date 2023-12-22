@@ -2,13 +2,14 @@ import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { current_path } from "../services/serviceConfigs";
+import { useAuth } from "../userAuth/authContextJs";
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate(); // Change from history to navigate
   const [err, setErr] = useState(false);
-
+  const { dispatch } = useAuth();
   const handleLogin = async () => {
     try {
       const apiUrl = process.env.REACT_APP_NODE_URL;
@@ -23,7 +24,7 @@ export default function LoginPage() {
     // Storing the object
     const userData = { userId: response.data.userId, username: response.data.username };
     localStorage.setItem('userData', JSON.stringify(userData));
-
+    dispatch({ type: 'LOGIN', payload: { username: response.data.username } });
     // Retrieving the object
         navigate('/home'); 
       }

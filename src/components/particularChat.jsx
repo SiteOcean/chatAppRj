@@ -30,7 +30,7 @@ const ChatRoom = () => {
       const data = {
         from: retrievedData.userId,
         to: userId,
-        message: messageInput,
+        message: messageInput.toString(),
         username:retrievedData.username,
         timestamp: new Date().toISOString(),
       };
@@ -106,12 +106,13 @@ const ChatRoom = () => {
     </h2>
     <div
       ref={messagesContainerRef}
-      className="overflow-y-scroll flex flex-col chatDiv h-[70vh] sm:h-[360px] border border-gray-200 mb-2 p-3 rounded-md gap-y-2"
+      className="overflow-y-scroll flex flex-col chatDiv max-h-[70vh] sm:h-[360px] border border-gray-200 mb-2 p-3 rounded-md gap-y-2"
     >
       {messages && messages.length > 0 ? messages.map((message, index) => (
 
         <div key={index} className={`${loginuser && loginuser.username && loginuser.username === message.username ? 'text-[#383737] bg-slate-100' : 'bg-[#fcf6f9] self-end text-[#f33bb6]'
-          } px-4 py-4 sm:p-6 mb-2 rounded-md w-[60%] sm:w-[55%] flex flex-wrap shadow-md relative`}>
+          } px-[5px] py-[21px] sm:p-6 mb-2 rounded-md w-[70%] sm:w-[55%] flex flex-wrap shadow-md relative`}
+          style={{ wordWrap: 'break-word' }} >
 
           <strong className='text-[9px] sm:text-[10px] absolute opacity-55 top-1 left-1 font-mono font-normal'>
             {loginuser && message && message.username === loginuser.username
@@ -119,7 +120,7 @@ const ChatRoom = () => {
               : message.username}
             
           </strong>
-          <span className=''>{message.message}</span>
+          <div className='break-all text-[14px]'>{message.message}</div>
           <div className='absolute bottom-1 right-2 opacity-55 flex gap-x-2 text-[10px]'>
           <p>{formatTime(message.timestamp)}</p>
           <p>{formatDate(message.timestamp)}</p>

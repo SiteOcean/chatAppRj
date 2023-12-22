@@ -5,6 +5,7 @@ import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { current_path } from '../services/serviceConfigs';
 import { FaBars } from "react-icons/fa";
+import Sidenav from './sidenav';
 const apiUrl = process.env.REACT_APP_NODE_URL;
 const socket = io(apiUrl, {
   transports: ['websocket'],
@@ -18,7 +19,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [loginuser, setLoginUser] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState({});
-
+  const [sidebar, setSidebar] = useState(false)
   const userdatafetch = async () => {
     try {
      
@@ -65,18 +66,27 @@ const HomePage = () => {
     };
   }, [navigate, setLoginUser]);
 
+  const sidebarHandle=()=>{
+
+    setTimeout(() => {
+      setSidebar(false)
+    }, 20);
+    
+  }
   return (
     <>
     {loginuser && (
-      <div className="w-full capitalize">
+      <div  className="w-full capitalize">
        
         <div className='flex items-center gap-5 pl-5 bg-[#fc24c6] p-3'>
-          <span >
+          <button onBlur={sidebarHandle} onClick={()=>setSidebar(true)}>
             <FaBars className='text-[25px] font-bold  text-[#ffffff]  text-center'/>
-          </span>
-        <h2 className="font-bold text-2xl  text-white">{loginuser.username} Chat App</h2>
+          </button>
+        <h2 className={` duration-500 font-bold text-2xl  text-white ${sidebar ? "ml-[40%] sm:ml-[20%]" : ""}`}>{loginuser.username} Chat App</h2>
         </div>
-        
+       
+          <Sidenav sidebar={sidebar} sidebarHandle={sidebarHandle} loginuser={loginuser} />
+      
         
         <div className='p-3'>
           {userdata &&
@@ -85,7 +95,7 @@ const HomePage = () => {
               return (
                 <div
                   key={val._id}
-                  className="cursor-pointer border w-[80%] sm:w-[30%] border-gray-200 opacity-65 p-[5px] mb-2 rounded-md flex items-center gap-x-3"
+                  className="cursor-pointer border hover:bg-slate-100 duration-300 w-[80%] sm:w-[30%] border-gray-200 opacity-65 p-[5px] mb-2 rounded-md flex items-center gap-x-3"
                   onClick={() => navigateToAboutPage(val._id, val.username)}
                 >
                   <span className='w-12 h-12 bg-gray-300 rounded-full'></span>
