@@ -20,45 +20,39 @@ const HomePage = () => {
   const [loginuser, setLoginUser] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState({});
   const [sidebar, setSidebar] = useState(false)
-  const userdatafetch = async () => {
+  const userdatafetch = async (_id) => {
     try {
-     
-      // const response = await axios.get(`${apiUrl}/api/usersdata`);
-      const response = await axios.get(`${current_path}/api/usersdata`);
+      const response = await axios.get(`${current_path}/api/usersdata?loginUserId=${_id}`);
+      // console.log(response.data);
       setUserdata(response.data.users);
+      // Handle the response and update your state as needed
     } catch (error) {
       console.error('Failed to fetch user data:', error.message);
     }
   };
-
-  const navigateToAboutPage = (userId, name) => {
-    // Mark messages as read when navigating to a new chat
-    setUnreadMessages((prevUnreadMessages) => ({
-      ...prevUnreadMessages,
-      [userId]: 0, // Mark all messages as read for the selected user
-    }));
-
-    socket.emit('set-active-user', userId);
-    navigate(`/particularChat/${userId}/${name}`);
+  
+  const makeChatsAssReaded = async (selectedUserId) => {
+    try {
+      await axios.get(`${current_path}/api/makeChatAsRead/${loginuser.userId}/${selectedUserId}`);
+    } catch (error) {
+      console.error('Failed to mark messages as read:', error.message);
+    }
+  };
+   
+  const navigateToChatRoom = (selectedUserId, name) => {
+    
+    makeChatsAssReaded(selectedUserId)
+    socket.emit('set-active-user', selectedUserId);
+    navigate(`/chatroom/${selectedUserId}/${name}`);
   };
 
   useEffect(() => {
-    userdatafetch();
+    
 
     const storedData = localStorage.getItem('userData');
     const retrievedData = JSON.parse(storedData);
     setLoginUser(retrievedData);
-
-    // Listen for private messages and update unread message count
-    socket.on('private-message', (data) => {
-      if (data.to === retrievedData.userId) {
-        // Increment unread message count for the recipient
-        setUnreadMessages((prevUnreadMessages) => ({
-          ...prevUnreadMessages,
-          [data.from]: (prevUnreadMessages[data.from] || 0) + 1,
-        }));
-      }
-    });
+    userdatafetch(retrievedData.userId);
 
     return () => {
       // Clean up event listener when component unmounts
@@ -91,18 +85,20 @@ const HomePage = () => {
         <div className='p-3'>
           {userdata &&
             userdata.map((val) => {
-              if (loginuser.userId === val._id) return null;
+              
               return (
                 <div
                   key={val._id}
-                  className="cursor-pointer border hover:bg-slate-100 duration-300 w-[80%] sm:w-[30%] border-gray-200 opacity-65 p-[5px] mb-2 rounded-md flex items-center gap-x-3"
-                  onClick={() => navigateToAboutPage(val._id, val.username)}
+                  className="cursor-pointer border hover:bg-slate-100 duration-300 w-[80%] sm:w-[30%] border-gray-200 opacity-65 p-[5px] mb-2 rounded-md flex items-center gap-x-3 relative"
+                  onClick={() => navigateToChatRoom(val._id, val.username)}
                 >
                   <span className='w-12 h-12 bg-gray-300 rounded-full'></span>
-                  <span className="mr-2 text-gray-900 font-semibold">{val.username}</span>
-                  {unreadMessages[val._id] > 0 && (
-                    <span className="text-red-500">{`(${unreadMessages[val._id]})`}</span>
-                  )}
+                  <span className="mr-2 text-gray-900 font-semibold">{val.username} 
+                 {val.unreadMessageCount > 0 ? <span className='absolute -top-1 -right-1 bg-yellow-300 rounded-full p-1 w-5 h-5 
+                  text-[10px] font-bold flex items-center justify-center'>{val.unreadMessageCount}</span>
+                : null}
+                  </span>
+                 
                 </div>
               );
             })}

@@ -5,6 +5,8 @@ import io from 'socket.io-client';
 import { GetStoreContext } from './useContextFile';
 import { current_path } from '../services/serviceConfigs';
 import { MdOutlineArrowBack, MdRefresh } from 'react-icons/md';
+import { LiaCheckDoubleSolid } from "react-icons/lia";
+import { FaCheck } from "react-icons/fa6";
 const apiUrl = process.env.REACT_APP_NODE_URL;
 const socket = io(current_path, {
   transports: ['websocket'],
@@ -53,32 +55,51 @@ const ChatRoom = () => {
     }
   };
 
+  // const makeChatsAssReaded = async () => {
+  //   try {
+  //     await axios.get(`${current_path}/api/makeChatAsRead/${loginuser.userId}/${userId}`);
+  //   } catch (error) {
+  //     console.error('Failed to mark messages as read:', error.message);
+  //   }
+  // };
+
+
   
   useEffect(() => {
     const storedData = localStorage.getItem('userData');
     const retrievedData = JSON.parse(storedData);
   
-    setloginuser(retrievedData)
+    setloginuser(retrievedData);
     socket.emit('set-active-user', retrievedData.userId);
   
     const handlePrivateMessage = (data) => {
       console.log("Received message:", data);
-      
+  
       // Only update state if the message is from the other user
       if (data.from === userId) {
         pushMessage(data);
+        // Emit a message-read event when the recipient reads the message
+        socket.emit('message-read', { from: userId, to: data.from });
       }
     };
   
+    const handleReadAcknowledgment = (acknowledgment) => {
+      console.log('Received read acknowledgment for the last message:', acknowledgment);
+      // Handle the read acknowledgment, e.g., update the UI to indicate the message is read
+    };
+  
     socket.on('private-message', handlePrivateMessage);
+    socket.on('message-read-acknowledgment', handleReadAcknowledgment);
     fetchChatHistory(retrievedData.userId);
   
-    // Cleanup event listener on component unmount
+    // Cleanup event listeners on component unmount
     return () => {
       socket.off('private-message', handlePrivateMessage);
-      setFullMessages([])
+      socket.off('message-read-acknowledgment', handleReadAcknowledgment);
+      setFullMessages([]);
     };
   }, [userId]);
+  
   
   useEffect(() => {
     // Scroll to the end when messages change
@@ -131,7 +152,7 @@ const ChatRoom = () => {
           </strong>
           <div className='break-all text-[14px] opacity-75'>{message.message}</div>
           <div className='absolute bottom-1 right-2 opacity-55 flex gap-x-2 text-[10px]'>
-          <p>{formatTime(message.timestamp)}</p>
+          <p className='flex gap-1 items-center'> { message.username === loginuser.username ? <>{ message.read ? <LiaCheckDoubleSolid className='text-[15px] text-[blue]'/> :  <FaCheck className='text-[14px] text-[gray]'/>} </> : null}{formatTime(message.timestamp)}</p>
           <p>{formatDate(message.timestamp)}</p>
           
           </div>
