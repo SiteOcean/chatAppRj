@@ -16,7 +16,7 @@ const ChatComponent = ({ userId, selectedUserId }) => {
         message: messageInput,
       };
       socket.emit('private-message', data);
-      console.log(data)
+     
       setMessages((prevMessages) => [...prevMessages, data]);
       setMessageInput('');
     }

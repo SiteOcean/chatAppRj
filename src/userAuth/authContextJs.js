@@ -20,7 +20,7 @@ const authReducer = (state, action) => {
 };
 
 const AuthProvider = ({ children }) => {
-  console.log("authprovider called!")
+  
   const storedData = localStorage.getItem('userData');
   const retrievedData = JSON.parse(storedData);
 

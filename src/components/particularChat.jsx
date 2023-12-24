@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import { GetStoreContext } from './useContextFile';
 import { current_path } from '../services/serviceConfigs';
+import { MdOutlineArrowBack, MdRefresh } from 'react-icons/md';
 const apiUrl = process.env.REACT_APP_NODE_URL;
 const socket = io(current_path, {
   transports: ['websocket'],
@@ -23,7 +24,7 @@ const ChatRoom = () => {
   const [loading, setloading] = useState(false)
 
   const sendMessage = () => {
-    console.log(new Date().toISOString(),)
+   
     const storedData = localStorage.getItem('userData');
     const retrievedData = JSON.parse(storedData);
     if (messageInput.trim() !== '' && messageInput.length < 500) {
@@ -101,9 +102,17 @@ const ChatRoom = () => {
    <div className='w-full'>
      <div className="w-[95%] capitalize sm:max-w-[80%] mt-[23px] sm:mt-[80px] mx-auto p-1 sm:p-4 bg-white rounded-md shadow-lg">
    {loading ? <>
-    <h2 className="text-xl mb-4 capitalize text-gray-500 font-semibold">
-      {loginuser && loginuser.username && loginuser.username} Chat to {name}
+    <div className='flex justify-between pl-2 pr-6 py-2'>
+
+    <h2 className="text-xl flex items-center gap-x-3 pb-2 capitalize text-[gray] font-semibold">
+      {/* {loginuser && loginuser.username && loginuser.username} */}
+      <MdOutlineArrowBack className='b'/>{" "} Chatting to {name}...
     </h2>
+    
+    {/* <MdRefresh onClick={loginuser ? () => fetchChatHistory(loginuser.userId) : null} /> */}
+    <MdRefresh className='text-[#ff55be] text-[28px]' onClick={loginuser ? ()=>window.location.reload() : null} />
+
+    </div>
     <div
       ref={messagesContainerRef}
       className="overflow-y-scroll flex flex-col chatDiv max-h-[70vh] sm:h-[360px] border border-gray-200 mb-2 p-3 rounded-md gap-y-2"
@@ -120,7 +129,7 @@ const ChatRoom = () => {
               : message.username}
             
           </strong>
-          <div className='break-all text-[14px]'>{message.message}</div>
+          <div className='break-all text-[14px] opacity-75'>{message.message}</div>
           <div className='absolute bottom-1 right-2 opacity-55 flex gap-x-2 text-[10px]'>
           <p>{formatTime(message.timestamp)}</p>
           <p>{formatDate(message.timestamp)}</p>

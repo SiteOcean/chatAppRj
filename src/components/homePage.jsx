@@ -7,7 +7,7 @@ import { current_path } from '../services/serviceConfigs';
 import { FaBars } from "react-icons/fa";
 import Sidenav from './sidenav';
 const apiUrl = process.env.REACT_APP_NODE_URL;
-const socket = io(apiUrl, {
+const socket = io(current_path, {
   transports: ['websocket'],
   withCredentials: true, // Include credentials (cookies) in the request
 });
