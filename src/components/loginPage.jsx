@@ -1,8 +1,15 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
+
 import { current_path } from "../services/serviceConfigs";
 import { useAuth } from "../userAuth/authContextJs";
+import io from 'socket.io-client';
+import { GetStoreContext } from "./useContextFile";
+const socket = io(current_path, {
+  transports: ['websocket'],
+  withCredentials: true, // Include credentials (cookies) in the request
+});
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -10,6 +17,8 @@ export default function LoginPage() {
   const navigate = useNavigate(); // Change from history to navigate
   const [err, setErr] = useState(false);
   const { dispatch } = useAuth();
+  const [cleanupDone, setCleanupDone] = useState(false);
+  const {oppositeUserOnline, setOnlineUsers} = GetStoreContext()
   const handleLogin = async () => {
     try {
       const apiUrl = process.env.REACT_APP_NODE_URL;
@@ -41,6 +50,29 @@ export default function LoginPage() {
       }
     }
   };
+
+  useEffect(() => {
+    const storedData = localStorage.getItem('userData');
+    const retrievedData = JSON.parse(storedData);
+    const handleOnlineUser = (data) => {
+      setOnlineUsers(data);
+    };
+    // Cleanup function to disconnect the socket and notify the backend when the component is unmounted
+    return () => {
+      if (retrievedData && retrievedData.userId ) {
+        
+        // Emit a custom event to notify the backend about the disconnection
+        socket.emit('remove-active-user', { userId: retrievedData.userId });
+        socket.on('connected-users', handleOnlineUser);
+        // Disconnect the socket
+        socket.disconnect();
+        setCleanupDone(true);
+      }
+    };
+  });
+  
+
+  
   // localStorage.clear();
   return (
     <div className="w-full flex justify-center items-center min-h-[100vh]">

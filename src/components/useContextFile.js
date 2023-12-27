@@ -4,6 +4,7 @@ const MyContextStore = createContext()
 
 export const MyStoreProvider=({children})=>{
     const [messages, setMessages] = useState([]);
+    const [oppositeUserOnline, setOppositeUserOnline] = useState([]);
 
     const pushMessage=(data)=>{
         setMessages((prevMessages) => [...prevMessages, data]);
@@ -26,13 +27,23 @@ export const MyStoreProvider=({children})=>{
           })
         );
       };
+
+      const markAllMessagesAsRead = () => {
+      
+        
+      };
       
 
+      
+      const setOnlineUsers=(data)=>{
+        setOppositeUserOnline(data);
+      }
     
 
 
     return (
-        <MyContextStore.Provider value={{messages, pushMessage, setFullMessages, setChatAsRead}}>
+        <MyContextStore.Provider value={{messages, pushMessage, setFullMessages, setChatAsRead,
+          oppositeUserOnline, setOnlineUsers, markAllMessagesAsRead}}>
                 {children}
         </MyContextStore.Provider>
     )

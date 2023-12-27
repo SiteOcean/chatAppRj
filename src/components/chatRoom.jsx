@@ -23,7 +23,7 @@ const ChatRoom = () => {
   const [oppositeUserOnline, setOppositeUserOnline] = useState(false);
   
   const {messages , pushMessage, setFullMessages,
-    setChatAsRead} = GetStoreContext()
+    setChatAsRead, markAllMessagesAsRead} = GetStoreContext()
   const messagesContainerRef = useRef(null);
   const [loading, setloading] = useState(false)
 
@@ -65,6 +65,7 @@ const ChatRoom = () => {
     } catch (error) {
       console.error('Failed to fetch chat history:', error.message);
     }
+    
   };
 
   
@@ -74,7 +75,16 @@ const ChatRoom = () => {
   
     setloginuser(retrievedData);
     socket.emit('set-active-user', retrievedData.userId);
+    const datas = {
+      from: userId,
+      to: retrievedData.userId,
+
+    }
+   
+
+     // Listen for 'updated-messages' event
   
+
     const handlePrivateMessage = (data) => {
       // console.log("Received message:", data);
       
@@ -92,27 +102,55 @@ const ChatRoom = () => {
       // For example, you may mark the corresponding message as read in your local state
       // or update the UI to indicate that the message has been read.
     };
+    const handleOnlineUser=(data)=>{
+      
+      let t = data.indexOf(userId)
+      if(t !== -1){
+        setOppositeUserOnline(true)
+      }
+      else{
+        setOppositeUserOnline(false)
+      }
+    }
+
+    const handleUpdatedMessages = (data) => {
+      console.log('Received updated-messages1:', data);
+      if(data === 'success'){
+    
+     markAllMessagesAsRead()
+      }
+      // Handle the event, e.g., update UI or perform any necessary actions
+    };
+
+    // Register the event listener when the component mounts
+    socket.on('updated-messages', handleUpdatedMessages);
+
     socket.on('readed-private-message-acknowledgment', handleReadAcknowledgment);
 
     socket.on('private-message', handlePrivateMessage);
+    socket.on('connected-users', handleOnlineUser);
 
+   
     fetchChatHistory(retrievedData.userId);
   
     // Cleanup event listeners on component unmount
     return () => {
       socket.off('private-message', handlePrivateMessage);
       socket.off('readed-private-message-acknowledgment', handleReadAcknowledgment);
-
-      setFullMessages([]);
+      // socket.off('connected-users', handleOnlineUser);
+      // socket.off('updated-messages', handleUpdatedMessages);
+      // setFullMessages([]);
     };
   }, [userId]);
+
+
   
   useEffect(() => {
     // Scroll to the end when messages change
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages]); 
 
   const formatDate = (timestamp) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -131,6 +169,7 @@ const ChatRoom = () => {
     
      <div className="w-[95%] capitalize sm:max-w-[80%] mt-[23px] sm:mt-[80px] mx-auto p-1 sm:p-4 bg-white rounded-md shadow-lg">
    {loading ? <>
+   {oppositeUserOnline ? "user Online" : "offline"}
     <div className='flex justify-between pl-2 pr-6 py-2'>
 
     <h2 className="text-xl flex items-center gap-x-3 pb-2 capitalize text-[gray] font-semibold">
