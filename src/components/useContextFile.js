@@ -13,11 +13,26 @@ export const MyStoreProvider=({children})=>{
         setMessages(data)
     }
 
+    const setChatAsRead = (_id) => {
+
+        setMessages((prevMessages) =>
+          prevMessages.map((val) => {
+            if (val._id === _id) {
+                console.log(val._id," === ",_id)
+              return { ...val, read: true }; // Update read to true
+            } else {
+              return val;
+            }
+          })
+        );
+      };
+      
+
     
 
 
     return (
-        <MyContextStore.Provider value={{messages, pushMessage, setFullMessages}}>
+        <MyContextStore.Provider value={{messages, pushMessage, setFullMessages, setChatAsRead}}>
                 {children}
         </MyContextStore.Provider>
     )

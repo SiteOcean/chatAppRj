@@ -20,29 +20,41 @@ const ChatRoom = () => {
   const [messageInput, setMessageInput] = useState('');
   const { userId, name } = useParams();
   const [loginuser, setloginuser] = useState(null)
-
-  const {messages , pushMessage, setFullMessages} = GetStoreContext()
+  const [oppositeUserOnline, setOppositeUserOnline] = useState(false);
+  
+  const {messages , pushMessage, setFullMessages,
+    setChatAsRead} = GetStoreContext()
   const messagesContainerRef = useRef(null);
   const [loading, setloading] = useState(false)
 
   const sendMessage = () => {
-   
     const storedData = localStorage.getItem('userData');
     const retrievedData = JSON.parse(storedData);
+  
     if (messageInput.trim() !== '' && messageInput.length < 500) {
       const data = {
         from: retrievedData.userId,
         to: userId,
         message: messageInput.toString(),
-        username:retrievedData.username,
+        username: retrievedData.username,
         timestamp: new Date().toISOString(),
       };
+  
+      // Emit the message to the server
       socket.emit('private-message', data);
-     
-      pushMessage(data);
+  
+      // Wait for the server to acknowledge the message
+      socket.once('private-message-acknowledgment', (acknowledgment) => {
+        // acknowledgment is the server's response, including the objectId
+        // Update your state using the server response
+      
+        pushMessage(acknowledgment);
+      });
+  
       setMessageInput('');
     }
-  };  
+  };
+  
 
   const fetchChatHistory = async (id) => {
     try {
@@ -55,15 +67,6 @@ const ChatRoom = () => {
     }
   };
 
-  // const makeChatsAssReaded = async () => {
-  //   try {
-  //     await axios.get(`${current_path}/api/makeChatAsRead/${loginuser.userId}/${userId}`);
-  //   } catch (error) {
-  //     console.error('Failed to mark messages as read:', error.message);
-  //   }
-  // };
-
-
   
   useEffect(() => {
     const storedData = localStorage.getItem('userData');
@@ -73,33 +76,36 @@ const ChatRoom = () => {
     socket.emit('set-active-user', retrievedData.userId);
   
     const handlePrivateMessage = (data) => {
-      console.log("Received message:", data);
-  
-      // Only update state if the message is from the other user
+      // console.log("Received message:", data);
+      
       if (data.from === userId) {
         pushMessage(data);
-        // Emit a message-read event when the recipient reads the message
-        socket.emit('message-read', { from: userId, to: data.from });
+        // data._id is message object id 
+        socket.emit('readed-private-message', data);
       }
     };
-  
-    const handleReadAcknowledgment = (acknowledgment) => {
-      console.log('Received read acknowledgment for the last message:', acknowledgment);
-      // Handle the read acknowledgment, e.g., update the UI to indicate the message is read
+    const handleReadAcknowledgment = (data) => {
+      // data._id contains the message ID for which the acknowledgment is received
+      // console.log(`Received acknowledgment for message with ID: ${data._id}`);
+      setChatAsRead(data._id)
+      // Now you can update your UI or perform any other actions based on the acknowledgment
+      // For example, you may mark the corresponding message as read in your local state
+      // or update the UI to indicate that the message has been read.
     };
-  
+    socket.on('readed-private-message-acknowledgment', handleReadAcknowledgment);
+
     socket.on('private-message', handlePrivateMessage);
-    socket.on('message-read-acknowledgment', handleReadAcknowledgment);
+
     fetchChatHistory(retrievedData.userId);
   
     // Cleanup event listeners on component unmount
     return () => {
       socket.off('private-message', handlePrivateMessage);
-      socket.off('message-read-acknowledgment', handleReadAcknowledgment);
+      socket.off('readed-private-message-acknowledgment', handleReadAcknowledgment);
+
       setFullMessages([]);
     };
   }, [userId]);
-  
   
   useEffect(() => {
     // Scroll to the end when messages change
@@ -118,9 +124,11 @@ const ChatRoom = () => {
     return new Date(timestamp).toLocaleTimeString(undefined, options);
   };
 
+ 
 
   return (
    <div className='w-full'>
+    
      <div className="w-[95%] capitalize sm:max-w-[80%] mt-[23px] sm:mt-[80px] mx-auto p-1 sm:p-4 bg-white rounded-md shadow-lg">
    {loading ? <>
     <div className='flex justify-between pl-2 pr-6 py-2'>
@@ -134,6 +142,7 @@ const ChatRoom = () => {
     <MdRefresh className='text-[#ff55be] text-[28px]' onClick={loginuser ? ()=>window.location.reload() : null} />
 
     </div>
+    
     <div
       ref={messagesContainerRef}
       className="overflow-y-scroll flex flex-col chatDiv max-h-[70vh] sm:h-[360px] border border-gray-200 mb-2 p-3 rounded-md gap-y-2"
