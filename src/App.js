@@ -8,6 +8,7 @@ import CreateUser from './components/createUser';
 import PrivateRoute from './userAuth/privateRoute'; // Update the path accordingly
 import { MyStoreProvider } from './components/useContextFile';
 import ToastCard from './components/toastCard';
+import LoginPrivateRoute from './userAuth/loginPrivateRoute';
 
 const App = () => {
   const [showToast, setShowToast] = useState(false);
@@ -51,8 +52,7 @@ const App = () => {
         )} */}
         <Router>
           <Routes>
-            <Route path='/' element={<LoginPage />} />
-            <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>}/>  
+            <Route path='/' element={<LoginPrivateRoute><HomePage /></LoginPrivateRoute>} />
             <Route path='/chatroom/:userId/:name' element={<PrivateRoute><ChatRoom /></PrivateRoute>} />
             <Route path='/signup' element={<CreateUser />} />
           </Routes>

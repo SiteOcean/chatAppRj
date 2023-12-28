@@ -19,7 +19,7 @@ export const MyStoreProvider=({children})=>{
         setMessages((prevMessages) =>
           prevMessages.map((val) => {
             if (val._id === _id) {
-                console.log(val._id," === ",_id)
+                
               return { ...val, read: true }; // Update read to true
             } else {
               return val;
@@ -30,6 +30,14 @@ export const MyStoreProvider=({children})=>{
 
       const markAllMessagesAsRead = () => {
       
+        setMessages((prevMessages) =>
+          prevMessages.map((val) => {
+           
+                
+              return { ...val, read: true }; 
+          
+          })
+        );
         
       };
       

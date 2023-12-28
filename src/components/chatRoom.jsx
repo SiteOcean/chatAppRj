@@ -23,7 +23,7 @@ const ChatRoom = () => {
   const [oppositeUserOnline, setOppositeUserOnline] = useState(false);
   
   const {messages , pushMessage, setFullMessages,
-    setChatAsRead, markAllMessagesAsRead} = GetStoreContext()
+  setChatAsRead, markAllMessagesAsRead} = GetStoreContext()
   const messagesContainerRef = useRef(null);
   const [loading, setloading] = useState(false)
 
@@ -50,6 +50,7 @@ const ChatRoom = () => {
       
         pushMessage(acknowledgment);
       });
+
   
       setMessageInput('');
     }
@@ -65,11 +66,18 @@ const ChatRoom = () => {
     } catch (error) {
       console.error('Failed to fetch chat history:', error.message);
     }
+
+    // emit sent user that i readed all messages
+    socket.emit('make-messages-readed', { toId:userId, fromId:id});
     
   };
 
   
   useEffect(() => {
+
+    if(!socket){
+      return;
+    }
     const storedData = localStorage.getItem('userData');
     const retrievedData = JSON.parse(storedData);
   
@@ -117,9 +125,19 @@ const ChatRoom = () => {
       console.log('Received updated-messages1:', data);
       if(data === 'success'){
     
-     markAllMessagesAsRead()
+    //  markAllMessagesAsRead()
       }
       // Handle the event, e.g., update UI or perform any necessary actions
+    };
+
+    const handleMessagesReaded = (data) => {
+      // Handle the 'messages-readed' event here
+      const { fromId } = data;
+      console.log(`Messages from user ${fromId} have been read.`);
+      if(fromId === userId){
+        markAllMessagesAsRead()
+      }
+      // Perform any additional actions you need
     };
 
     // Register the event listener when the component mounts
@@ -129,7 +147,7 @@ const ChatRoom = () => {
 
     socket.on('private-message', handlePrivateMessage);
     socket.on('connected-users', handleOnlineUser);
-
+    socket.on('messages-readed', handleMessagesReaded);
    
     fetchChatHistory(retrievedData.userId);
   

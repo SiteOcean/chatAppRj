@@ -2,11 +2,25 @@ import { MdClose } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../userAuth/authContextJs";
 
+import io from 'socket.io-client';
+import { current_path } from "../services/serviceConfigs";
+const socket = io(current_path, {
+  transports: ['websocket'],
+  withCredentials: true, // Include credentials (cookies) in the request
+});
 export default function Sidenav({sidebar, sidebarHandle, loginuser}){
 
     const navigate = useNavigate();
     const { dispatch } = useAuth();
+
    function clearLocalStore(){
+
+    const storedData = localStorage.getItem('userData');
+    const retrievedData = JSON.parse(storedData);
+    if(retrievedData && retrievedData.userId){
+    socket.emit('remove-active-user', { userId: retrievedData.userId });
+    }
+
     localStorage.clear();
     dispatch({ type: 'LOGOUT' });
     // navigate('/', { replace: true })
